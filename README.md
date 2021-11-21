@@ -14,7 +14,7 @@ As of now it only works with Nest Protect
 
 - Nest could change their webapp api at any time, making this defunct
 
-## Setup Node.JS For Grabbing Refresh Token
+## Setup Node.JS And Grab Refresh Token
 1. Download and install Node.JS https://nodejs.org/en/download/
 2. Download the whole homebridge-nest repository https://codeload.github.com/chrisjshull/homebridge-nest/zip/refs/heads/master
 3. Extract the folder from the .zip file

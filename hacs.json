@@ -1,0 +1,4 @@
+{
+    "name": "Not So Bad Nest",
+    "domains": ["binary_sensor", "sensor"]
+}

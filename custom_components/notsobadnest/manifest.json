@@ -1,0 +1,12 @@
+{
+    "domain": "notsobadnest",
+    "name": "Not So Bad Nest",
+    "documentation": "https://github.com/mskjel/notsobadnest",
+    "issue_tracker": "https://github.com/mskjel/notsobadnest/issues",
+    "dependencies": [],
+    "codeowners": ["@MSkjel", "@therealryanbonham", "@USA-RedDragon"],
+    "requirements": ["simplejson"],
+    "iot_class": "cloud_polling",
+    "version": 1,
+    "config_flow": true
+  }

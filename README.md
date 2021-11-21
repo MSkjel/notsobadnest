@@ -15,9 +15,10 @@ As of now it only works with Nest Protect
 - Nest could change their webapp api at any time, making this defunct
 
 ## Setup
-Grab a refresh token using https://github.com/chrisjshull/homebridge-nest#using-a-google-account---refresh-token-method.
-Open the integrations tab on your HA instance and search for Not So Bad Nest.
-Paste the whole refresh token you got above in the empty field and press ok.
+1. Grab a refresh token using https://github.com/chrisjshull/homebridge-nest#using-a-google-account---refresh-token-method.
+2. Add this repository to your HACS custom repositories https://hacs.xyz/docs/faq/custom_repositories
+3. Open the integrations tab on your HA instance and search for Not So Bad Nest.
+4. Paste the whole refresh token you got above in the empty field and press ok.
 
 ## Disclaimer
 I am not a python developer, as one might see from the source code. The integration has been running fine on my instance for many days, but it could break at any time.

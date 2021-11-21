@@ -16,7 +16,7 @@ As of now it only works with Nest Protect
 
 ## Setup Node.JS And Grab Refresh Token
 1. Download and install Node.JS https://nodejs.org/en/download/
-2. Sign out of your windows account and then sign in again(Or just restart the computer)
+2. Restart the computer. Important, or you are going to get "npm is not recognized as an internal or an external command operable program" errors
 3. Download the whole homebridge-nest repository https://codeload.github.com/chrisjshull/homebridge-nest/zip/refs/heads/master
 4. Extract the folder from the .zip file
 5. Navigate to the folder where login.js is located

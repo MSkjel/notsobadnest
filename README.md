@@ -22,7 +22,7 @@ As of now it only works with Nest Protect
 5. Shift + Right click in the folder and click Open PowerShell window here
 6. Paste `npm install readline; npm install querystring; npm install axios` in the PowerShell window and press enter
 7. Paste `node login.js` in the PowerShell window and follow the script's instructions carefully
-8. Add this repository to your HACS custom repositories https://hacs.xyz/docs/faq/custom_repositories
+8. Add this repository to your HACS custom repositories.
 9. Open the integrations tab on your HA instance and search for Not So Bad Nest.
 10. Paste the whole refresh token you got above in the empty field and press ok.
 

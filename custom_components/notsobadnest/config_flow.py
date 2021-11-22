@@ -15,13 +15,20 @@ from .api import NestAPI
 
 _LOGGER = logging.getLogger(__name__)
 
-DATA_SCHEMA = vol.Schema({vol.Required("refresh_token"): str})
+DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required("refresh_token"): str,
+        vol.Optional("nest_field_test", default=False): bool,
+    }
+)
 
 
 async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     refresh_token: str = data["refresh_token"]
     if len(refresh_token) > 65 and refresh_token.startswith("1//"):
-        return await NestAPI(hass, data["refresh_token"]).setup()
+        return await NestAPI(
+            hass, data["refresh_token"], data["nest_field_test"]
+        ).setup()
     else:
         raise InvalidToken
 

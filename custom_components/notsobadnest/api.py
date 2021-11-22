@@ -8,6 +8,9 @@ from homeassistant.util import dt
 API_URL = "https://home.nest.com"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
 CLIENT_ID = "733249279899-1gpkq9duqmdp55a7e5lft1pr2smumdla.apps.googleusercontent.com"
+CLIENT_ID_FT = (
+    "384529615266-57v6vaptkmhm64n9hn5dcmkr4at14p8j.apps.googleusercontent.com"
+)
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -23,11 +26,12 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class NestAPI:
-    def __init__(self, hass, refresh_token):
+    def __init__(self, hass, refresh_token, field_test=False):
         self._hass = hass
         self.rooms = {}
         self.protects = {}
         self.available = True
+        self._field_test = field_test
 
         self._session = FuturesSession()
         self._session.headers.update(
@@ -160,7 +164,7 @@ class NestAPI:
         }
         data = {
             "refresh_token": refresh_token,
-            "client_id": CLIENT_ID,
+            "client_id": CLIENT_ID if not self._field_test else CLIENT_ID_FT,
             "grant_type": "refresh_token",
         }
         r = await self._call_nest_api(

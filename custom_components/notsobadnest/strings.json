@@ -2,15 +2,16 @@
 	"config":{
 		"step":{
 			"user":{
-				"title":"Fill in Refresh Token",
+				"title":"Fill in refresh token",
 				"data":{
-					"refresh_token":"Refresh Token"
+					"refresh_token":"Refresh Token",
+					"nest_field_test": "Nest Field Test Account?"
 				}
 			}
 		},
 		"error":{
 			"invalid_token":"Invalid token supplied. Token should be around 100 characters long and start with 1//",
-			"unknown":"[%key:common::config_flow::error::unknown%]"
+			"unknown":"Unknown error"
 		},
 		"abort":{
 			"already_configured":"[%key:common::config_flow::abort::already_configured_device%]"

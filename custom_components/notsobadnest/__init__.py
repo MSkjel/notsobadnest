@@ -31,9 +31,12 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Not So Bad Nest from a config entry."""
-    hass.data[DOMAIN][entry.entry_id] = NestAPI(
-        hass, entry.data["refresh_token"], entry.data["nest_field_test"]
-    )
+    try:
+        hass.data[DOMAIN][entry.entry_id] = NestAPI(
+            hass, entry.data["refresh_token"], entry.data["nest_field_test"]
+        )
+    except KeyError:
+        hass.data[DOMAIN][entry.entry_id] = NestAPI(hass, entry.data["refresh_token"])
 
     await hass.data[DOMAIN][entry.entry_id].setup()
 

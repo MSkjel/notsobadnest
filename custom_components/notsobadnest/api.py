@@ -272,6 +272,7 @@ class NestAPI:
 
             for bucket in buckets:
                 sensor_data = bucket["value"]
+                # _LOGGER.error(bucket)
                 sn = bucket["object_key"].split(".")[1]
 
                 if bucket["object_key"].startswith(f"topaz.{sn}"):
@@ -281,7 +282,8 @@ class NestAPI:
                         self.protects[sn].update(sn, sensor_data)
 
             return True
-        except Exception:
+        except Exception as e:
+            _LOGGER.error(f"Error grabbing update:{e}")
             return False
 
 
@@ -294,7 +296,11 @@ class Room:
 class NestProtect:
     def __init__(self, api, serial, data: dict):
         self.serial = serial
-        self.room = api.rooms[data["where_id"]]
+        self.room = (
+            api.rooms[data["where_id"]]
+            if data["where_id"] in api.rooms
+            else Room({"where_id": "Test", "name": "Test"})
+        )
         self.name = self.room.name + " Protect"
         self.ip = data["wifi_ip_address"]
         self.ac_power = data["wired_or_battery"] == 0
@@ -313,11 +319,15 @@ class NestProtect:
         self.motion_enabled = data["night_light_enable"]
         self.motion_detected = data["auto_away"] == 0
         self.manual_test_active = (
-            dt.as_timestamp(dt.utcnow()) - data["latest_manual_test_start_utc_secs"]
-            < 60
-            # and not dt.as_timestamp(dt.utcnow())
-            # - data["latest_manual_test_end_utc_secs"]
-            # < 20
+            (
+                dt.as_timestamp(dt.utcnow()) - data["latest_manual_test_start_utc_secs"]
+                < 60
+                # and not dt.as_timestamp(dt.utcnow())
+                # - data["latest_manual_test_end_utc_secs"]
+                # < 20
+            )
+            if "latest_manual_test_start_utc_secs" in data
+            else False
         )
         self.battery_state = data["battery_health_state"]
         self.battery_level = round(data["battery_level"] / 100, 1)

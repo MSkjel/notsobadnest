@@ -31,19 +31,14 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     issue_token = data["issue_token"] if "issue_token" in data else None
     cookie = data["cookie"] if "cookie" in data else None
 
-    if refresh_token is not None and len(refresh_token) > 0:
-        if len(refresh_token) > 65 and refresh_token.startswith("1//"):
+    if refresh_token is not None:
+        if len(refresh_token) > 90 and refresh_token.startswith("1//"):
             return await NestAPI(
                 hass, refresh_token=refresh_token, nest_field_test=nest_field_test
             ).setup()
         else:
             raise InvalidToken
-    elif (
-        issue_token is not None
-        and cookie is not None
-        and len(issue_token) > 0
-        and len(cookie) > 0
-    ):
+    elif issue_token is not None and cookie is not None:
         return await NestAPI(hass, issue_token=issue_token, cookie=cookie).setup()
     else:
         raise InvalidCookie

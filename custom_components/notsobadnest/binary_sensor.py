@@ -66,11 +66,6 @@ class NestSmokeAlarmSensor(NestProtectSensorBase):
         return f"{self._protect.serial}_smoke_alarm"
 
     @property
-    def device_state_attributes(self):
-        """Return the state attributes of the device."""
-        return self._protect.attributes
-
-    @property
     def is_on(self):
         """Return the state of the sensor."""
         return self._protect.smoke_detected
@@ -97,11 +92,6 @@ class NestSmokeWarningSensor(NestProtectSensorBase):
     def unique_id(self):
         """Return Unique ID string."""
         return f"{self._protect.serial}_smoke_warning"
-
-    @property
-    def device_state_attributes(self):
-        """Return the state attributes of the device."""
-        return self._protect.attributes
 
     @property
     def is_on(self):

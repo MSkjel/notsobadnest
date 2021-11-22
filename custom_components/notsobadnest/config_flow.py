@@ -5,8 +5,9 @@ import logging
 from typing import Any
 
 import voluptuous as vol
+from voluptuous.validators import Boolean
 
-from homeassistant import config_entries
+from homeassistant import config_entries, exceptions
 from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN
@@ -18,8 +19,11 @@ DATA_SCHEMA = vol.Schema({vol.Required("refresh_token"): str})
 
 
 async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
-
-    return await NestAPI(hass, data["refresh_token"]).setup()
+    refresh_token: str = data["refresh_token"]
+    if len(refresh_token) > 65 and refresh_token.startswith("1//"):
+        return await NestAPI(hass, data["refresh_token"]).setup()
+    else:
+        raise InvalidToken
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -36,8 +40,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return self.async_create_entry(
                         title="Not So Bad Nest", data=user_input
                     )
-                else:
-                    errors["base"] = "Bad Refresh Token"
+            except InvalidToken:
+                _LOGGER.exception("Invalid refresh_token")
+                errors["base"] = "invalid_token"
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
@@ -46,3 +51,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user", data_schema=DATA_SCHEMA, errors=errors
         )
+
+
+class InvalidToken(exceptions.HomeAssistantError):
+    """Error to indicate there is an invalid token."""

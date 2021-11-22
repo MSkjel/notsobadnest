@@ -1,0 +1,19 @@
+{
+	"config":{
+		"step":{
+			"user":{
+				"title":"Fill in refresh token",
+				"data":{
+					"refresh_token":"Refresh Token"
+				}
+			}
+		},
+		"error":{
+			"invalid_token":"Invalid token supplied. Token should be around 100 characters long and start with 1//",
+			"unknown":"[%key:common::config_flow::error::unknown%]"
+		},
+		"abort":{
+			"already_configured":"[%key:common::config_flow::abort::already_configured_device%]"
+		}
+	}
+}

@@ -31,12 +31,23 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Not So Bad Nest from a config entry."""
-    try:
-        hass.data[DOMAIN][entry.entry_id] = NestAPI(
-            hass, entry.data["refresh_token"], entry.data["nest_field_test"]
-        )
-    except KeyError:
-        hass.data[DOMAIN][entry.entry_id] = NestAPI(hass, entry.data["refresh_token"])
+
+    refresh_token = (
+        entry.data["refresh_token"] if "refresh_token" in entry.data else None
+    )
+    nest_field_test = (
+        entry.data["nest_field_test"] if "nest_field_test" in entry.data else None
+    )
+    issue_token = entry.data["issue_token"] if "issue_token" in entry.data else None
+    cookie = entry.data["cookie"] if "cookie" in entry.data else None
+
+    hass.data[DOMAIN][entry.entry_id] = NestAPI(
+        hass,
+        refresh_token=refresh_token,
+        nest_field_test=nest_field_test,
+        issue_token=issue_token,
+        cookie=cookie,
+    )
 
     await hass.data[DOMAIN][entry.entry_id].setup()
 

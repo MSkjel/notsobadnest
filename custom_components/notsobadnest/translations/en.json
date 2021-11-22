@@ -2,16 +2,19 @@
 	"config":{
 		"step":{
 			"user":{
-				"title":"Fill in refresh token",
+				"title": "Fill in refresh token or issue token and cookie",
 				"data":{
-					"refresh_token":"Refresh Token",
+					"refresh_token": "Refresh Token",
+					"issue_token": "Issue Token",
+					"cookie": "Cookie",
 					"nest_field_test": "Nest Field Test Account?"
 				}
 			}
 		},
 		"error":{
-			"invalid_token":"Invalid token supplied. Token should be around 100 characters long and start with 1//",
-			"unknown":"Unknown error"
+			"invalid_token": "Invalid token supplied. Token should be around 100 characters long and start with 1//",
+			"invalid_cookie": "Invalid cookie and or issue token. Grab the cookie and issue token from the browser",
+			"unknown": "Unknown error"
 		},
 		"abort":{
 			"already_configured":"[%key:common::config_flow::abort::already_configured_device%]"

@@ -26,12 +26,22 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class NestAPI:
-    def __init__(self, hass, refresh_token, field_test=False):
+    def __init__(
+        self,
+        hass,
+        refresh_token=None,
+        nest_field_test=False,
+        issue_token=None,
+        cookie=None,
+    ):
         self._hass = hass
         self.rooms = {}
         self.protects = {}
         self.available = True
-        self._field_test = field_test
+        self._refresh_token = refresh_token
+        self._field_test = nest_field_test
+        self._issue_token = issue_token
+        self._cookie = cookie
 
         self._session = FuturesSession()
         self._session.headers.update(
@@ -40,7 +50,6 @@ class NestAPI:
                 "User-Agent": USER_AGENT,
             }
         )
-        self._refresh_token = refresh_token
 
     async def setup(self):
         if await self.login():
@@ -152,24 +161,39 @@ class NestAPI:
         return False
 
     async def login(self):
-        status = await self._login_google(self._refresh_token)
+        status = await self._login_google(
+            self._refresh_token, self._issue_token, self._cookie
+        )
         if not status:
             _LOGGER.error("Login To Google Failes")
         return status
 
-    async def _login_google(self, refresh_token):
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": USER_AGENT,
-        }
-        data = {
-            "refresh_token": refresh_token,
-            "client_id": CLIENT_ID if not self._field_test else CLIENT_ID_FT,
-            "grant_type": "refresh_token",
-        }
-        r = await self._call_nest_api(
-            method="post", url=TOKEN_URL, headers=headers, data=data
-        )
+    async def _login_google(self, refresh_token, issue_token, cookie):
+        if refresh_token is not None:
+            headers = {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": USER_AGENT,
+            }
+            data = {
+                "refresh_token": refresh_token,
+                "client_id": CLIENT_ID if not self._field_test else CLIENT_ID_FT,
+                "grant_type": "refresh_token",
+            }
+            r = await self._call_nest_api(
+                method="post", url=TOKEN_URL, headers=headers, data=data
+            )
+        else:
+            headers = {
+                "User-Agent": USER_AGENT,
+                "Sec-Fetch-Mode": "cors",
+                "X-Requested-With": "XmlHttpRequest",
+                "Referer": "https://accounts.google.com/o/oauth2/iframe",
+                "cookie": cookie,
+            }
+            r = await self._call_nest_api(
+                method="get", url=issue_token, headers=headers
+            )
+
         if not r:
             _LOGGER.error("Failed Getting Access Token")
             return False

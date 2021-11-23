@@ -11,14 +11,24 @@ CLIENT_ID = "733249279899-1gpkq9duqmdp55a7e5lft1pr2smumdla.apps.googleuserconten
 CLIENT_ID_FT = (
     "384529615266-57v6vaptkmhm64n9hn5dcmkr4at14p8j.apps.googleusercontent.com"
 )
+
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/75.0.3770.100 Safari/537.36"
 )
+KNOWN_BUCKET_TYPES = ["topaz"]
+APP_LAUNCH_JSON_WHERES = {
+    "known_bucket_types": ["where"],
+    "known_bucket_versions": [],
+}
+APP_LAUNCH_JSON_BUCKETS = {
+    "known_bucket_types": KNOWN_BUCKET_TYPES,
+    "known_bucket_versions": [],
+}
+
 URL_JWT = "https://nestauthproxyservice-pa.googleapis.com/v1/issue_jwt"
 NEST_API_KEY = "AIzaSyAdkSIMNc51XGNEAYWasX9UOWkS5P6sZE4"
-KNOWN_BUCKET_TYPES = ["topaz"]
 
 REQUEST_TIMEOUT = 30
 
@@ -39,6 +49,10 @@ class NestAPI:
         self.protects = {}
         self.available = True
         self._refresh_token = refresh_token
+        self._access_token = None
+        self._app_launch_headers = None
+        self._app_launch_url = None
+        self._user_id = None
         self._field_test = nest_field_test
         self._issue_token = issue_token
         self._cookie = cookie
@@ -53,6 +67,7 @@ class NestAPI:
 
     async def setup(self):
         if await self.login():
+            await self.update_wheres()
             return await self.update()
         else:
             return False
@@ -221,80 +236,77 @@ class NestAPI:
             else:
                 self._user_id = r["claims"]["subject"]["nestId"]["id"]
                 self._access_token = r["jwt"]
+                self._app_launch_url = (
+                    f"{API_URL}/api/0.1/user/{self._user_id}/app_launch"
+                )
+                self._app_launch_headers = {
+                    "Authorization": f"Basic {self._access_token}"
+                }
         return True
 
     async def update(self):
         try:
-            APP_LAUNCH_URL = f"{API_URL}/api/0.1/user/{self._user_id}/app_launch"
-            APP_LAUNCH_HEADERS = {"Authorization": f"Basic {self._access_token}"}
-            APP_LAUNCH_JSON = {
-                "known_bucket_types": ["where"],
-                "known_bucket_versions": [],
-            }
-
             r = await self._call_nest_api(
                 method="post",
-                url=APP_LAUNCH_URL,
-                json=APP_LAUNCH_JSON,
-                headers=APP_LAUNCH_HEADERS,
+                url=self._app_launch_url,
+                json=APP_LAUNCH_JSON_BUCKETS,
+                headers=self._app_launch_headers,
             )
 
             if not r:
-                _LOGGER.error("Failed Calling App Launch")
+                _LOGGER.error("Failed Calling App Launch(Protects)")
                 return False
 
             buckets = r["updated_buckets"]
 
-            for bucket in buckets:
-                sensor_data = bucket["value"]
-                sn = bucket["object_key"].split(".")[1]
-                if bucket["object_key"].startswith(f"where.{sn}"):
-                    for where in sensor_data["wheres"]:
-                        self.rooms[where["where_id"]] = Room(where)
-
-            APP_LAUNCH_JSON = {
-                "known_bucket_types": KNOWN_BUCKET_TYPES,
-                "known_bucket_versions": [],
-            }
-
-            r = await self._call_nest_api(
-                method="post",
-                url=APP_LAUNCH_URL,
-                json=APP_LAUNCH_JSON,
-                headers=APP_LAUNCH_HEADERS,
-            )
-
-            if not r:
-                _LOGGER.error("Failed Calling App Launch")
-                return False
-
-            buckets = r["updated_buckets"]
-
-            for bucket in buckets:
-                sensor_data = bucket["value"]
-                # _LOGGER.error(bucket)
-                sn = bucket["object_key"].split(".")[1]
-
-                if bucket["object_key"].startswith(f"topaz.{sn}"):
-                    if not self.protects.get(sn):
-                        self.protects[sn] = NestProtect(self, sn, sensor_data)
-                    else:
-                        self.protects[sn].update(sn, sensor_data)
+            self.update_protects(buckets)
 
             return True
         except Exception as e:
             _LOGGER.error(f"Error grabbing update:{e}")
             return False
 
+    async def update_wheres(self):
+        r = await self._call_nest_api(
+            method="post",
+            url=self._app_launch_url,
+            json=APP_LAUNCH_JSON_WHERES,
+            headers=self._app_launch_headers,
+        )
+
+        if not r:
+            _LOGGER.error("Failed Calling App Launch(Wheres)")
+            return False
+
+        buckets = r["updated_buckets"]
+
+        for bucket in buckets:
+            sensor_data = bucket["value"]
+            sn = bucket["object_key"].split(".")[1]
+            if bucket["object_key"].startswith(f"where.{sn}"):
+                for where in sensor_data["wheres"]:
+                    self.rooms[where["where_id"]] = Room(where)
+
+    def update_protects(self, buckets):
+        for bucket in buckets:
+            sensor_data = bucket["value"]
+            sn = bucket["object_key"].split(".")[1]
+
+            if bucket["object_key"].startswith(f"topaz.{sn}"):
+                if not self.protects.get(sn):
+                    self.protects[sn] = NestProtect(self, sn, sensor_data)
+                else:
+                    self.protects[sn].update(sensor_data)
+
 
 class Room:
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data) -> None:
         self.where_id = data["where_id"]
         self.name = data["name"]
 
 
 class NestProtect:
-    def __init__(self, api, serial, data: dict):
+    def __init__(self, api, serial, data):
         self.serial = serial
         self.room = (
             api.rooms[data["where_id"]]
@@ -307,9 +319,9 @@ class NestProtect:
         self.software_version = data["software_version"]
         self.model = data["model"]
         self.replace_by = dt.utc_from_timestamp(data["replace_by_date_utc_secs"])
-        self.update(serial, data)
+        self.update(data)
 
-    def update(self, serial, data: dict):
+    def update(self, data):
         self.smoke_detected = data["smoke_status"] == 3
         self.smoke_warning = data["smoke_status"] == 1 or data["smoke_status"] == 2
         self.co_detected = data["co_status"] == 3

@@ -52,7 +52,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.data[DOMAIN][entry.entry_id].setup()
 
     async def async_update_data():
-        with async_timeout.timeout(12):
+        with async_timeout.timeout(15):
             return await hass.data[DOMAIN][entry.entry_id].update()
 
     hass.coordinator = DataUpdateCoordinator(
@@ -60,7 +60,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER,
         name="protectsensor",
         update_method=async_update_data,
-        update_interval=timedelta(seconds=5),
+        update_interval=timedelta(seconds=10),
     )
 
     for component in PLATFORMS:

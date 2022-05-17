@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.helpers import entity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
@@ -75,7 +76,7 @@ class NestIPSensor(NestProtectSensorBase):
     @property
     def entity_category(self):
         """Icon of the entity."""
-        return "diagnostic"
+        return entity.EntityCategory.DIAGNOSTIC
 
 
 class NestSerialNumberSensor(NestProtectSensorBase):
@@ -103,7 +104,7 @@ class NestSerialNumberSensor(NestProtectSensorBase):
     @property
     def entity_category(self):
         """Icon of the entity."""
-        return "diagnostic"
+        return entity.EntityCategory.DIAGNOSTIC
 
 
 class NestReplaceBySensor(NestProtectSensorBase):
@@ -131,7 +132,7 @@ class NestReplaceBySensor(NestProtectSensorBase):
     @property
     def entity_category(self):
         """Icon of the entity."""
-        return "diagnostic"
+        return entity.EntityCategory.DIAGNOSTIC
 
 
 class NestACBatterySensor(NestProtectSensorBase):
@@ -164,7 +165,7 @@ class NestACBatterySensor(NestProtectSensorBase):
     @property
     def entity_category(self):
         """Icon of the entity."""
-        return "diagnostic"
+        return entity.EntityCategory.DIAGNOSTIC
 
 
 class NestBatteryLevelSensor(NestProtectSensorBase):
@@ -202,7 +203,7 @@ class NestBatteryLevelSensor(NestProtectSensorBase):
     @property
     def entity_category(self):
         """Icon of the entity."""
-        return "diagnostic"
+        return entity.EntityCategory.DIAGNOSTIC
 
 
 class NestSteamDetectionSensor(NestProtectSensorBase):
@@ -230,4 +231,4 @@ class NestSteamDetectionSensor(NestProtectSensorBase):
     @property
     def entity_category(self):
         """Icon of the entity."""
-        return "diagnostic"
+        return entity.EntityCategory.DIAGNOSTIC
